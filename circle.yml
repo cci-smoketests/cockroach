@@ -18,22 +18,4 @@ test:
   override:
     - build/circle-test.sh
 
-deployment:
-  docker:
-    branch: master
-    commands:
-      - sed "s/<EMAIL>/$DOCKER_EMAIL/;s/<AUTH>/$DOCKER_AUTH/" < "resource/deploy_templates/.dockercfg.template" > ~/.dockercfg
-      - |
-          export VERSION=$(git describe || git rev-parse --short HEAD)
-          echo "Deploying ${VERSION}..."
-          if [ -n "$DOCKER_EMAIL" ]; then
-            build/push-docker-deploy.sh
-          fi
-      - aws configure set region us-east-1
-      - build/build-static-binaries.sh
-      - mkdir -p "${CIRCLE_ARTIFACTS}/acceptance_deploy"
-      - time acceptance/acceptance.test -test.v -test.timeout 5m
-          -i cockroachdb/cockroach -num-local 3
-          -l "${CIRCLE_ARTIFACTS}"/acceptance_deploy 2>&1 >
-          "${CIRCLE_ARTIFACTS}/acceptance_deploy.log"
-      - build/push-aws.sh
+
